@@ -1,0 +1,80 @@
+<script>
+export default {
+    data() {
+        return {
+            channel: 'notifications',
+            message: '',
+            messagesFromServer: [],
+            ws: null,
+        }
+    },
+    methods: {
+        sendMessage: function () {
+            console.log("sendMessage")
+            this.ws.send(this.message);
+        },
+        closeConnection: function () {
+            this.ws.close();
+            this.ws = null;
+        },
+        openConnection: function () {
+            this.ws = new WebSocket("ws://localhost:3000/?channel=" + this.channel);
+            try {
+                this.ws.onmessage = ({data}) => {
+                    this.messagesFromServer.push(data);
+                    console.log('message', this.messagesFromServer);
+                }
+                this.ws.onopen = ({data}) => {
+                    console.log("Successfully connected to the echo websocket server...", data)
+                }
+                this.ws.onclose = ({data}) => {
+                    console.log("Closed connected to the echo websocket server...", data)
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        },
+
+    },
+}
+</script>
+
+<template>
+    <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700">
+        <a href="#">
+            <h2 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Subscriber</h2>
+        </a>
+        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">This is a compontent that is getting messages from redis->socket->vue</p>
+        <div class="flex mt-4">
+            <div class="relative w-full">
+                <input type="text" class="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="channel" v-model="channel">
+                <button v-if="!ws" type="button" @click="openConnection()"
+                        class="text-white absolute right-2 bottom-2.5 bg-blue-700 font-medium rounded-lg text-sm px-2 py-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+
+                </button>
+                <button v-if="ws" type="button" @click="closeConnection()"
+                        class="text-white absolute right-2 bottom-2.5 bg-red-700 font-medium rounded-lg text-sm px-2 py-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+
+                </button>
+            </div>
+        </div>
+        <div class="flex mt-4">
+            <div class="relative w-full">
+                <input type="text" class="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Message" v-model="message">
+                <button v-if="message" type="button" @click="sendMessage()" class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Send</button>
+            </div>
+        </div>
+        <h2 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Messages from server:</h2>
+        <ul class="space-y-1 max-w-md list-disc list-inside text-gray-500 dark:text-gray-400">
+            <li v-for="message in messagesFromServer">
+                {{ message }}
+            </li>
+        </ul>
+    </div>
+</template>
