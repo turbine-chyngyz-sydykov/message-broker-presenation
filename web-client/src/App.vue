@@ -1,5 +1,8 @@
 <script setup>
 import Subscriber from './components/Subscriber.vue'
+import StreamMessagesByOne from './components/StreamMessagesByOne.vue'
+import StreamAllMessages from './components/StreamAllMessages.vue'
+import StreamLastMessage from "./components/StreamLastMessage.vue";
 </script>
 
 <template>
@@ -9,5 +12,10 @@ import Subscriber from './components/Subscriber.vue'
     <div class="grid grid-cols-3 gap-4">
         <Subscriber/>
         <Subscriber/>
+        <Subscriber/>
+
+        <StreamAllMessages/>
+        <StreamMessagesByOne/>
+        <StreamLastMessage/>
     </div>
 </template>
