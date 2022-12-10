@@ -5,8 +5,6 @@ const REDIS_SERVER = "redis://localhost:6379";
 const redisClient = redis.createClient(REDIS_SERVER);
 
 export async function publish(channel, message) {
-
-    console.log('pub: ' + message, channel);
     const publisher = redisClient.duplicate();
     await publisher.connect();
     await publisher.publish(channel, message);
@@ -19,7 +17,6 @@ export async function disconnect() {
 export async function subscribe(channel, callBack) {
     const subscriber = redisClient.duplicate();
     await subscriber.connect();
-    console.log('sub: ', channel);
     await subscriber.subscribe(channel, (message) => {
         callBack(message);
     });
@@ -100,15 +97,3 @@ export async function xReadLastMessage(stream, callBack) {
         console.log('No new stream entries.');
     }
 }
-//
-//
-//
-// async xAdd() {
-//     const redisClient = redis.createClient(REDIS_SERVER);
-//     await redisClient.connect();
-//     for(let i = 0; i < 10; i++) {
-//         await redisClient.sendCommand(['XADD', 'mystream', '*', 'name', faker.name.firstName()], function(err, reply) {
-//             console.log(err, reply);
-//         });
-//     }
-// }

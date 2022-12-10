@@ -14,6 +14,7 @@ const redisPobChannel = 'notifications';
 
 (async () => {
     await subscribe(redisPobChannel, (message) => {
+        console.log('sub: ', message)
         io.emit(pubChannelName, message);
     });
 })();
@@ -37,8 +38,8 @@ async function getStreamMessagesByOne(currentId, isFinished) {
 
                 const messages = getMessages(response, 'mystream');
                 currentId = response[0].messages[0].id;
-                console.log('xReadOne: ', messages)
                 message = messages[0].id + ': ' + messages[0].message.name;
+                console.log('stream by one:', message)
                 io.emit(streamSingleChannel, message);
                 setTimeout(() => {
                     getStreamMessagesByOne(currentId, false)
@@ -65,6 +66,7 @@ io.on("connection", async (socket) => {
 
     if (action === 'pub') {
         socket.on(pubChannelName, async (message) => {
+            console.log('pub: ' + message);
             await publish(redisPobChannel, message);
         });
     }
@@ -74,14 +76,13 @@ io.on("connection", async (socket) => {
             getMessages(response, 'mystream');
 
             const messages = getMessages(response, 'mystream');
-            const currentId = response[0].messages[0].id;
 
             const returningMessages = [];
 
             for (const [key, singleMessage] of Object.entries(messages)) {
-                console.log('xReadAll: ', singleMessage)
                 returningMessages.push(singleMessage.id + ': ' + singleMessage.message.name)
             }
+            console.log('xReadAll: ', returningMessages)
             io.emit(streamAllChannelName, returningMessages);
         });
     }
